@@ -1,0 +1,21 @@
+---
+title: "How can I assess the influence of explanatory variables on the event?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{explain}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(recforest)
+```
+
+This feature is not yet available. It will be implemented in a near future. Stay tuned!

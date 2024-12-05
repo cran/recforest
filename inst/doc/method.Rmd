@@ -1,0 +1,89 @@
+---
+title: "How can I get more details about the methodology?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{method}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+We developed `{recforest}` by extending the random survival forest algorithm to handle recurrent events in a survival framework, in potential presence of a terminal event, of longitudinal markers, and of missing data. To do so, the splitting rule at each node was tailor-made for recurrent events analysis and mean cumulative number of events served in terminal node estimators. We characterized the performance both with discrimination and calibration by introducing a generalized C-index for recurrent event analysis and applying an innovative MSE.
+
+The method aggregates an ensemble of trees for recurrent event data. The process includes rules for splitting nodes, estimating terminal node values, and pruning the tree to prevent overfitting.
+
+1. Splitting Rule
+
+At each node of the tree, the algorithm randomly selects $m \in \mathbb{N}$ predictors from the available predictors, then applies different statistical tests to determine the best split according to absence or presence of a terminal event.
+
+ * Case **with no terminal event**
+
+The splitting criterion is based on maximizing a pseudo-score test statistic, which identifies the best variable to split the data to create two subgroups.
+
+ * Case **with a terminal event**
+
+The splitting criterion uses the Wald test statistic derived from the Ghosh-Lin model, which accounts for both recurrent events and the possibility of a terminal event. The model helps identify the best split while taking into account the potential dependence between recurrent events and terminal events.
+
+2. Terminal Node Estimator
+
+The terminal node represents a final segment of the tree, and an estimator is used to evaluate the cumulative recurrent event function (MCF) for each subgroup at the terminal nodes. The cumulative MCF is estimated differently based on the presence or absence of a terminal event.
+
+ * Case **with no terminal event**
+
+The estimator is the MCF estimator $\hat{\mu}_b(t|\textbf{x})$ for a given tree $b$, calculated as
+
+$\int_0^t \frac{dN_b(u)}{Y_b(u)}$
+
+where $dN_b(u)$ represents the number of recurrent events and $Y_b(u)$ represents the number of individuals at risk at time $u$ for the node associated with tree $b$.
+
+ * Case **with a terminal event**
+
+The MCF estimator is adjusted by the survival probability $\hat{S}_b(u)$, accounting for terminal events:
+
+$\int_0^t \hat{S}_b(u) \frac{\sum_i Y_{b,i}(u) dN_{b,i}(u)}{\sum_i Y_{b,i}(u)}$
+
+where $\hat{S}_b(u)$ is the survival function, $Y_{b,i}(u)$ represents the number of individuals at risk at time $u$, and $dN_{b,i}(u)$ is the number of recurrent events for individual $i$.
+
+3. Pruning Strategy
+
+To avoid overfitting, the tree is pruned based on a minimal number of events and/or individuals required at the terminal nodes. Nodes with insufficient events or individuals are not retained in the final tree model, ensuring a more robust and generalizable model.
+
+The ensemble estimator over $B$ trees is
+
+$\hat{M}(t|\mathbf{x})=\frac{1}{B} \sum_{b=1}^B \hat{\mu}_b(t|\mathbf{x})$
+
+Performance is evaluated on out-of-bag samples based on 3 metrics :
+
+* C-index for recurrent events
+
+* Integrated MSE for recurrent events
+
+* Integrated Score for recurrent events
+
+
+## Modeling framework
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("img/method.png")
+```
+
+## References
+
+Bouaziz O. Assessing model prediction performance for the expected cumulative number of recurrent events. Lifetime Data Anal. 2024 Jan;30(1):262–89.
+
+Cook RJ, Lawless JF, Lee KA. A copula-based mixed Poisson model for bivariate recurrent events under event-dependent censoring. Statistics in Medicine. 2010;29(6):694–707.
+
+Ghosh D, Lin DY. Marginal Regression Models for Recurrent and Terminal Events. Statistica Sinica. 2002;12(3):663–88.
+
+Ishwaran H, Kogalur UB, Blackstone EH, Lauer MS. Random survival forests. The Annals of Applied Statistics. 2008 Sep;2(3):841–60.
+
+Murris, J., Bouaziz, O., Jakubczak, M., Katsahian, S., & Lavenu, A. (2024). Random survival forests for the analysis of recurrent events for right-censored data, with or without a terminal event.
+
